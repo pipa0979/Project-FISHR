@@ -8,8 +8,10 @@
 #include <fstream>
 #include <time.h>
 #include <assert.h>
-#include <map>
 using namespace std;
+/*<piyush>remove */
+
+
 void ErrorCalculator::createLogFile( std::string path )
 {
      path  = path + std::string( ".log" );
@@ -79,7 +81,7 @@ void ErrorCalculator::changeMapFile( string path )
              hMarker_id.push_back( cur_marker );
              while( oPos < marker_id.size() &&
                     marker_id[oPos].bp_distance <= hMarker_id[nPos].bp_distance)
-	     {
+       {
                   mapper[ oPos++ ] = nPos;
              }
              ++nPos;
@@ -171,22 +173,22 @@ void ErrorCalculator::readPedFile(string path, string missing)
                         }
              
                         if(start == 0)
-			{
+      {
                               for(int t = 6; ( t + 1 ) < v.size(); t+=2 )
                               {
                                    locator.push_back( v[t][0] );
                               }
                               ++start;
-			}
+      }
                          for(int t = 6, i = 0; ( t + 1 ) < v.size() && i < locator.size(); t+=2, ++i )
                          {
                                 SNPs s;
                                 if( missing.compare( v[t] )==0 ||missing.compare( v[t+1] )==0 )
-				{
+        {
                                         warn = true;
-					s.SNP1 = 0;
+          s.SNP1 = 0;
                                         s.SNP2 = 1;
-				}
+        }
 
                                 s.SNP1 = (locator[ i ] == v[t][0] ) ? false : true;
                                 s.SNP2 = ( locator[ i ] == v[t+1][0] ) ? false : true;
@@ -195,7 +197,7 @@ void ErrorCalculator::readPedFile(string path, string missing)
                         j++;
                 }
           
-	       if(warn)
+         if(warn)
                {
                     cerr<<"warning: In ped file "<<path<< ": missing values of type: " << missing << " characters found" << endl; 
                }
@@ -207,6 +209,15 @@ void ErrorCalculator::readPedFile(string path, string missing)
          }
 }
 
+//<piyush-- calculate how many number of AGCT seq ar there in the ped file first line>
+/*
+int returnACGTcountPED(string pedFile)
+{
+  cout<<"in here"<<endl;
+  return 55;
+
+}
+*/
 void ErrorCalculator::readHPedFile(string path, string missing)
 {
          if(pers_count<=0)
@@ -250,22 +261,22 @@ void ErrorCalculator::readHPedFile(string path, string missing)
                         }
                         j = ( it - sample_id.begin() ) /2 ;
                         if(start == 0)
-			{
+      {
                               for(int t = 6; ( t + 1 ) < v.size(); t+=2 )
                               {
                                    locator.push_back( v[t][0] );
                               }
                               ++start;
-			}
+      }
                          for(int t = 6, i = 0; ( t + 1 ) < v.size() && i < locator.size(); t+=2, ++i )
                          {
                                 SNPs s;
                                 if( missing.compare( v[t] )==0 ||missing.compare( v[t+1] )==0 )
-				{
+        {
                                         warn = true;
-					s.SNP1 = 0;
+          s.SNP1 = 0;
                                         s.SNP2 = 1;
-				}
+        }
 
                                 s.SNP1 = (locator[ i ] == v[t][0] ) ? false : true;
                                 s.SNP2 = ( locator[ i ] == v[t+1][0] ) ? false : true;
@@ -274,7 +285,7 @@ void ErrorCalculator::readHPedFile(string path, string missing)
                       //  j++;
                 }
           
-	       if(warn)
+         if(warn)
                {
                     cerr<<"warning: In ped file "<<path<< ": missing values of type: " << missing << " characters found" << endl; 
                }
@@ -287,76 +298,76 @@ void ErrorCalculator::readHPedFile(string path, string missing)
 }
 //New function for signaling whether or not an SH is an initial drop
 bool ErrorCalculator::isInitialCmDrop(int snp1, int snp2, float minLength){
-	if( ( (marker_id[snp2].cm_distance - marker_id[snp1].cm_distance) < minLength )  ){
-		return true;
-	} else {
-		return false;
-	}
+  if( ( (marker_id[snp2].cm_distance - marker_id[snp1].cm_distance) < minLength )  ){
+    return true;
+  } else {
+    return false;
+  }
 }
 
 
 //New algorithm to start at middle, and step outwards for trim positions:
 //Nate 2/4/2014
 vector<int> ErrorCalculator::getTrimPositions(std::vector<float>averages,int snp1,int snp2,float threshold,float minLength){
-	vector<int> trimPositions;
-	int length = snp2 - snp1; 
-	int midpoint = (int)((length/2.0)+0.5);
-	int distance_from_midpoint = 30; //this value by default. Will change if SH.length < 61
-	int start = midpoint-distance_from_midpoint, end = midpoint+distance_from_midpoint;
+  vector<int> trimPositions;
+  int length = snp2 - snp1; 
+  int midpoint = (int)((length/2.0)+0.5);
+  int distance_from_midpoint = 30; //this value by default. Will change if SH.length < 61
+  int start = midpoint-distance_from_midpoint, end = midpoint+distance_from_midpoint;
 
-	//debug items
-	vector<int> starts;
-	vector<int> ends;
-	starts.push_back(start);
-	ends.push_back(end);
+  //debug items
+  vector<int> starts;
+  vector<int> ends;
+  starts.push_back(start);
+  ends.push_back(end);
 
-	//perform a quick initial check on the SH. If it is below the initial SH cM length, then let it be known
-	if( ( (marker_id[snp2].cm_distance - marker_id[snp1].cm_distance) < minLength )  ){
-	
-		trimPositions.push_back(snp1);
-		trimPositions.push_back(snp2);
-		trimPositions.push_back(1); //same as error drop code
-		return trimPositions;
-	}
-	if(length <= 61) {
-	//In this case, we can't move +- 30 on either side, so we need to determine this size dynamically, based on the length of the SH.		
-		distance_from_midpoint = (int)( (0.28 * length) + 0.5 );		
-		trimPositions.push_back(0);
-		trimPositions.push_back(length-1);
-		return trimPositions;
-	}
-	for(int i = (midpoint-distance_from_midpoint); i >= 0; i--){ //find the start of the SH. Originally had a value of 30 hardcoded.
-		if(averages[i]>threshold){
-			start = i+1;
-			starts.push_back(start);
-			break; //once you've found a start point, get out of there.
-		}
-		start--;
-		starts.push_back(start);
-	}
-	for(int i = midpoint+distance_from_midpoint; i < length; i++){ //find the end point
-		if(averages[i]>threshold){
-			end = i-1; 
-			ends.push_back(end);
-			break;
-		}
-		end++;
-		ends.push_back(end);
-	}
-	//at this point, you have your start and end positions, so check the cM distance, if it passes, then push it. Otherwise, it will have to be 
-	//thrown out, so push something very small to fail the SNP threshold
-	//cout << "In TRIM, the distance is : " << ((marker_id[(snp1+end)].cm_distance) - (marker_id[(snp1+start)].cm_distance)) << " and the minlength is : " << minLength << endl
-	if(start == -1) start = 0;
-	
-	if( ((marker_id[(snp1+end)].cm_distance) - (marker_id[(snp1+start)].cm_distance)) >= minLength ){
-        	trimPositions.push_back(start);
-		trimPositions.push_back(end);
-	}else{ //in this case, we have failed the cM length constraint, so drop it
-		trimPositions.push_back(start);
-		trimPositions.push_back(end);
-		trimPositions.push_back(2);//eo output code
-	}
-	return trimPositions;
+  //perform a quick initial check on the SH. If it is below the initial SH cM length, then let it be known
+  if( ( (marker_id[snp2].cm_distance - marker_id[snp1].cm_distance) < minLength )  ){
+  
+    trimPositions.push_back(snp1);
+    trimPositions.push_back(snp2);
+    trimPositions.push_back(1); //same as error drop code
+    return trimPositions;
+  }
+  if(length <= 61) {
+  //In this case, we can't move +- 30 on either side, so we need to determine this size dynamically, based on the length of the SH.   
+    distance_from_midpoint = (int)( (0.28 * length) + 0.5 );    
+    trimPositions.push_back(0);
+    trimPositions.push_back(length-1);
+    return trimPositions;
+  }
+  for(int i = (midpoint-distance_from_midpoint); i >= 0; i--){ //find the start of the SH. Originally had a value of 30 hardcoded.
+    if(averages[i]>threshold){
+      start = i+1;
+      starts.push_back(start);
+      break; //once you've found a start point, get out of there.
+    }
+    start--;
+    starts.push_back(start);
+  }
+  for(int i = midpoint+distance_from_midpoint; i < length; i++){ //find the end point
+    if(averages[i]>threshold){
+      end = i-1; 
+      ends.push_back(end);
+      break;
+    }
+    end++;
+    ends.push_back(end);
+  }
+  //at this point, you have your start and end positions, so check the cM distance, if it passes, then push it. Otherwise, it will have to be 
+  //thrown out, so push something very small to fail the SNP threshold
+  //cout << "In TRIM, the distance is : " << ((marker_id[(snp1+end)].cm_distance) - (marker_id[(snp1+start)].cm_distance)) << " and the minlength is : " << minLength << endl
+  if(start == -1) start = 0;
+  
+  if( ((marker_id[(snp1+end)].cm_distance) - (marker_id[(snp1+start)].cm_distance)) >= minLength ){
+          trimPositions.push_back(start);
+    trimPositions.push_back(end);
+  }else{ //in this case, we have failed the cM length constraint, so drop it
+    trimPositions.push_back(start);
+    trimPositions.push_back(end);
+    trimPositions.push_back(2);//eo output code
+  }
+  return trimPositions;
 }
 
 vector<int> ErrorCalculator::getTrimPositions(std::vector<float>averages,int snp1,int snp2, float threshold_start, float threshold_end,float minLength,int ma_err_ends)
@@ -387,57 +398,57 @@ vector<int> ErrorCalculator::getTrimPositions(std::vector<float>averages,int snp
 //getTrueMovingAverages() is a slightly differnt version of getMovingAverages, and it is intended to be 
 //used only when calculating the TrueIBD segments. The main difference comes in where it starts calculating
 vector<float>  ErrorCalculator::getTrueMovingAverages(vector<int> errors,int snp1,int snp2,int width){
-	vector<float> averages;
-	vector<int> e_Places;
-	int length = snp2-snp1;
-	//move in one window length on both ends
-	int start = snp1;// + (width/2);
-	int end = snp2;// - (width/2);
-	int previous = 0;
-	int present;
-	averages.resize((length-width));
-//	averages.resize(length);
-	e_Places.resize(length+(width/2));
+  vector<float> averages;
+  vector<int> e_Places;
+  int length = snp2-snp1;
+  //move in one window length on both ends
+  int start = snp1;// + (width/2);
+  int end = snp2;// - (width/2);
+  int previous = 0;
+  int present;
+  averages.resize((length-width));
+//  averages.resize(length);
+  e_Places.resize(length+(width/2));
 
-	for(int i = 0; i < errors.size(); i++){
-		e_Places[errors[i]] = 1;
-	}
-	
-	for(int i = 0; i<(width); i++){
-		averages[0] += e_Places[i];
-	}
-	present = width;
-	for(int i = 1; ((i < averages.size())) ; i++){
-		averages[i] = averages[i-1] + (e_Places[present]) - (e_Places[previous]);
-		present++;
-		previous++;
-	}
+  for(int i = 0; i < errors.size(); i++){
+    e_Places[errors[i]] = 1;
+  }
+  
+  for(int i = 0; i<(width); i++){
+    averages[0] += e_Places[i];
+  }
+  present = width;
+  for(int i = 1; ((i < averages.size())) ; i++){
+    averages[i] = averages[i-1] + (e_Places[present]) - (e_Places[previous]);
+    present++;
+    previous++;
+  }
 
-	for(int i = 0; i < averages.size(); i++){
-		averages[i] /=width;
-	}
-	return averages;
+  for(int i = 0; i < averages.size(); i++){
+    averages[i] /=width;
+  }
+  return averages;
 }
 //======================
 //------------------with new, backwards algorithm
 vector<float> ErrorCalculator::getTrueMovingAverages2(vector<int> errors,int snp1, int snp2, int width){
-	vector<float> averages;
+  vector<float> averages;
         vector<int> e_Places;
         int length = snp2-snp1;
-	int start = snp1;
-	int end = snp2;
-	int previous = 0;
-	int present;
-	averages.resize((length-width));
-	e_Places.resize(length+(width/2));
-	for(int i = 0; i < errors.size(); i++){
+  int start = snp1;
+  int end = snp2;
+  int previous = 0;
+  int present;
+  averages.resize((length-width));
+  e_Places.resize(length+(width/2));
+  for(int i = 0; i < errors.size(); i++){
                 e_Places[errors[i]] = 1;
         }
         for(int i = 0; i<(width); i++){
                 averages[0] += e_Places[i];
         }
         present = width;
-	for(int i = 1; ((i < averages.size())) ; i++){
+  for(int i = 1; ((i < averages.size())) ; i++){
                 averages[i] = averages[i-1] + (e_Places[present]) - (e_Places[previous]);
                 present++;
                 previous++;
@@ -447,71 +458,166 @@ vector<float> ErrorCalculator::getTrueMovingAverages2(vector<int> errors,int snp
         }
         return averages;
 }
-//------------------
-//======================
-//adding reference as of 4/25..
-vector<float>  ErrorCalculator::getMovingAverages(vector<int> errors,int snp1,int snp2,int width)
-{
-        vector<float> averages;
-	      int length= snp2-snp1;
-        vector<int> e_Places;
-        averages.resize(length);
-        e_Places.resize(length+(width/2));
-	      e_Places[(e_Places.size()-1)]=1;//this is injecting an error at the last possible position. We may ignore this from now on.
-	
-        //fill the IE array(errors) with the error locations listed in e_Places[]
-        for(int i=0;i<errors.size();i++)
-        {
-              //this is to adjust for off-by-one indexing I believe
-             if( (errors[i] - 1) < 0){
 
-	           }else{
-              		e_Places[(errors[i]-1)]=1;
-	           } 
-        }//end for
-	
-        int presentWidth = width/2;
-        int previous=0,present=presentWidth;
+/* MOVING AVERAGEPIYUSH
+vector<float>  ErrorCalculator::getMovingAverages(vector<int> errors,int snp1,int snp2,int width, int extendSNP)//snp1,snp2=start,end;<piyush> added the param int EXTENDSNP for calculating moving window avg
+{
+  if(extendSNP%2!=0)//if inputted extended snp is even, divide the window equally
+  {
+    cout<<"extendSNP=  "<<extendSNP<<endl;
+    cout<<"Value is not odd, program is exiting"<<endl;
+    exit(0);
+  //
+  }
+
+  if(extendSNP==0)
+  {
+    extendSNP= width; // window equals to the extended window
+  }
+  vector<float> averages;
+  vector<int> e_Places;
+  int beg=0;
+  int end=0;
+  int length= snp2-snp1;
+
+
+  averages.resize(length+1);//0-254,270
+
+
+
+  end=errors.size()-1;//<piyush, a1>'th number 1st refers to the first element //255
+  //cout<<"errors[end] ="<<errors[end]<<endl;//255
+
+  e_Places.resize(errors[end]+1);
+  //cout<<"errors[errors.size()-1] = "<<errors[errors.size()-1]<<endl; // <piyush, a1>maximum error size index errors.size()-1
+
+//e_Places[errors[errors.size()-1]]=1;//<piyush, a1>just marking the end of the segment as 1,can be omitted
+  //not really necessary just for say that the last value of error[smthing] is an error and hence 1
+  //can be averted.//maybe keep it we'll see
+   for(int i=0;i<errors.size();i++)
+     {
+     e_Places[errors[i]]=1;
+     //cout<<"e_Places[errors[i]] = "<<e_Places[errors[i]]<<" errors[i] = "<<errors[i]<<endl;
+     }
+
+//cout<<"e_Places.size()= "<<e_Places.size()<<endl;
+
+//cout<<"averages.resize(length) ="<<averages.size()<<endl;//255
+int cBeg=snp1;
+int cEnd=snp2;
+int iter=0;
+float avg=0;
+int pBeg=0;
+int pEnd=0;
+pBeg=cBeg - ( (extendSNP/2)-1);
+pEnd=cEnd + (extendSNP/2);
+//cout<<"cBeg= "<<cBeg<<"cEnd= "<<cEnd<<endl;
+//cout<<"pBeg= "<<pBeg<<"pEnd= "<<pEnd<<endl;
+int incr=0;//errors[beg];
+int avgC=length;
+
+
+while(iter<=avgC)
+  {
+  int i;
+  //cout<<"snp1= "<<snp1<<"snp2= "<<snp2<<endl;
+
+      if(extendSNP%2==0)
+      {
+         for ( i=incr-(extendSNP/2)+1 ;i<=incr+(extendSNP/2);i++)
+         {
+            avg=i;
+          //  cout<<"i= "<<i<<endl;
+           if(i<0 ||i>errors[end])
+           {
+            // cout<<"errors[end]"<<errors[end]<<endl;
+             avg=0;
+             averages[iter]=averages[iter]+avg;
+            //  cout<<"averages[iter]= "<<averages[iter]<<"iter= "<<iter<<endl;
+
+           }
+           else
+           {
+           averages[iter]=averages[iter]+e_Places[i];
+        //  cout<<"averages[iter]= "<<averages[iter]<<"iter= "<<iter<<endl;
+           }
+         }
+
+      }
+      else
+      {
+        cout<<"Extenderror exception" <<endl;
+        exit(0);
+      }
+      //cout<<"i"<<i-1<<" averages["<<iter<<"]= "<< averages[iter]<<" iter= " <<iter<<endl;
+
+  incr++;
+  iter++;
+  snp1++;
+  }
+//cout<<"Size of average="<<averages.size();
+
+
+for (int i=0;i<averages.size();i++){
+  //cout<<"average b "<<averages[i]<<endl;
+  averages[i]/=extendSNP;
+  //cout<<"average a "<<averages[i]<<endl;
+  //cout<<"i="<<i<<endl;
+}
+//cout<<"Size of average="<<averages.size()<<endl;
+
+
+
+return averages;
+}
+
+*/
+
+
+
+/*
+
+
         for(int i=0;i<presentWidth;i++)
         {
-                averages[0]+=e_Places[i];
+                averages[0]+=e_Places[i];//e[0]+...+e[4] if the win size = 10 (i.e. for the first half)
 
         }
-	int lastPos = averages.size() - 1;
-	e_Places[lastPos] = 1; //account for error at the end of the SH...why this isn't already showing up is unknown
-	//we will need to calculate the last position here as well, and the summations will all change
-	for(int i = lastPos; i > (lastPos - (width/2)); i--){
-		averages[(averages.size()-1)] += e_Places[i];
-	}
-	present -= 1;
-	int midpoint = (int)((length/2.0)+0.5);
-	//forwards
-	for(int i = 1; i < midpoint; i++){
-		if(present<width){
-			averages[i] = averages[i-1] + e_Places[++present];
-		}else{
-			averages[i] = averages[i-1] + (e_Places[present] - e_Places[previous]);
-			previous++;
-			present++;
-		}
-	}
-	//backwards
-	int backwardPresent = lastPos - (width/2);
-	if(backwardPresent <= 0){
-		cerr << backwardPresent << endl;
-	}
-	int backwardPrevious = lastPos;
-	int avLast = averages.size() - 2;
-	for(int i = avLast; i >= midpoint; i--){
-		if(backwardPresent > (lastPos - width)){
-			averages[i] = averages[i+1] + e_Places[backwardPresent--];//try both ++pre and post++
-		}else{
-			averages[i] = averages[i+1] + (e_Places[backwardPresent] - e_Places[backwardPrevious]);
-			backwardPresent--;
-			backwardPrevious--;
-		}
-	}
-	//this can all stay the same
+  int lastPos = averages.size() - 1;
+  e_Places[lastPos] = 1; //account for error at the end of the SH...why this isn't already showing up is unknown
+  //we will need to calculate the last position here as well, and the summations will all change
+  for(int i = lastPos; i > (lastPos - (width/2)); i--){
+    averages[(averages.size()-1)] += e_Places[i];
+  }
+  present -= 1;
+  int midpoint = (int)((length/2.0)+0.5);
+  //forwards
+  for(int i = 1; i < midpoint; i++){
+    if(present<width){
+      averages[i] = averages[i-1] + e_Places[++present];
+    }else{
+      averages[i] = averages[i-1] + (e_Places[present] - e_Places[previous]);
+      previous++;
+      present++;
+    }
+  }
+  //backwards
+  int backwardPresent = lastPos - (width/2);
+  if(backwardPresent <= 0){
+    cerr << backwardPresent << endl;
+  }
+  int backwardPrevious = lastPos;
+  int avLast = averages.size() - 2;
+  for(int i = avLast; i >= midpoint; i--){
+    if(backwardPresent > (lastPos - width)){
+      averages[i] = averages[i+1] + e_Places[backwardPresent--];//try both ++pre and post++
+    }else{
+      averages[i] = averages[i+1] + (e_Places[backwardPresent] - e_Places[backwardPrevious]);
+      backwardPresent--;
+      backwardPrevious--;
+    }
+  }
+  //this can all stay the same
         for(int i=0;i<length;i++)
         {
                 if(averages[i]<0)averages[i]=0;
@@ -534,6 +640,132 @@ vector<float>  ErrorCalculator::getMovingAverages(vector<int> errors,int snp1,in
         }
         return averages;
 }
+*/
+
+//------------------
+//======================
+//adding reference as of 4/25..
+
+vector<float>  ErrorCalculator::getMovingAverages(vector<int> errors,int snp1,int snp2,int width, int extendSNP)//snp1,snp2=start,end;<piyush> added the param int EXTENDSNP for calculating moving window avg
+{
+
+
+  /*cout<<"getMovingAverages snp1= "<<snp1<<endl;
+  cout<<"getMovingAverages snp2 = "<<snp2<<endl;
+  cout<<"getMovingAverages errors size ="<<errors.size()<<endl;*/
+    vector<float> averages;
+    int length= snp2-snp1;
+    vector<int> e_Places;
+    averages.resize(length);
+    e_Places.resize(length+(width/2));
+    e_Places[(e_Places.size()-1)]=1;//this is injecting an error at the last possible position. We may ignore this from now on.
+
+    //fill the IE array(errors) with the error locations listed in e_Places[]
+    for(int i=0;i<errors.size();i++)
+    {
+          //this is to adjust for off-by-one indexing I believe
+         if( (errors[i] - 1) < 0){
+
+           }else{
+              e_Places[(errors[i]-1)]=1;
+           }
+    }//end for
+
+
+    /*Testing remove it */
+   /* for (int i=0;i<errors.size();i++)
+    {
+      cout<<"errors["<<i<<"]"<<"= "<<errors[i]<<endl;
+    }
+    cout<<endl<<endl;
+    int high=errors[errors.size()-1];
+    for (int i=errors.size()-1; i>0;i--)
+    {
+      if(high -errors[i]<40)
+      {
+        continue;
+      }
+      else if(high- errors[i]==40)
+      {
+        icnr++;
+        break;
+      }
+      else if (high -errors[i]>40)
+      {
+        break;
+      }
+    }
+    incrB++;*/
+    /*------upto here--------------*/
+
+
+
+
+    int presentWidth = width/2;
+    int previous=0,present=presentWidth;
+    for(int i=0;i<presentWidth;i++)
+    {
+            averages[0]+=e_Places[i];
+
+    }
+int lastPos = averages.size() - 1;
+e_Places[lastPos] = 1; //account for error at the end of the SH...why this isn't already showing up is unknown
+//we will need to calculate the last position here as well, and the summations will all change
+for(int i = lastPos; i > (lastPos - (width/2)); i--){
+  averages[(averages.size()-1)] += e_Places[i];
+}
+present -= 1;
+int midpoint = (int)((length/2.0)+0.5);
+//forwards
+for(int i = 1; i < midpoint; i++){
+  if(present<width){
+    averages[i] = averages[i-1] + e_Places[++present];
+  }else{
+    averages[i] = averages[i-1] + (e_Places[present] - e_Places[previous]);
+    previous++;
+    present++;
+  }
+}
+//backwards
+int backwardPresent = lastPos - (width/2);
+if(backwardPresent <= 0){
+  cerr << backwardPresent << endl;
+}
+int backwardPrevious = lastPos;
+int avLast = averages.size() - 2;
+for(int i = avLast; i >= midpoint; i--){
+  if(backwardPresent > (lastPos - width)){
+    averages[i] = averages[i+1] + e_Places[backwardPresent--];//try both ++pre and post++
+  }else{
+    averages[i] = averages[i+1] + (e_Places[backwardPresent] - e_Places[backwardPrevious]);
+    backwardPresent--;
+    backwardPrevious--;
+  }
+}
+//this can all stay the same
+    for(int i=0;i<length;i++)
+    {
+            if(averages[i]<0)averages[i]=0;
+            if(i<width/2)
+            {
+                    averages[i]/=(width/2+i);
+            }
+
+            else if((length-i-1)<width/2)
+            {
+                    averages[i]/=(width/2+(length-i-1));
+
+            }
+
+            else
+            {
+                    averages[i]/=width;
+            }
+
+    }
+    return averages;
+}
+
 vector<int>ErrorCalculator::getFinalErrors(vector<vector< int> > errors)const
 {
         vector<int>finalPositions;
@@ -547,7 +779,7 @@ vector<int>ErrorCalculator::getFinalErrors(vector<vector< int> > errors)const
         int first_pos=getMax(errors[0][p1],errors[1][p2],errors[2][p3],errors[3][p4]); //get the max distance of the first set, this is the longest match and hence is an...error?
 
         finalPositions.push_back(first_pos); //here we push back an actual error position. Things may be as simple as always setting finalPositions[0] = 0, just to ensure that there is always an 
-					    //error at position 0 in the SH. Similarily, we could add an error to the end of the SH by setting finalPositions[finalPositions.size()-1] = SH.size() as well
+              //error at position 0 in the SH. Similarily, we could add an error to the end of the SH by setting finalPositions[finalPositions.size()-1] = SH.size() as well
    while(p1<errors[0].size()||p2<errors[1].size()||p3<errors[2].size()||p4<errors[3].size())
    {
         maxlen=0;
@@ -674,7 +906,7 @@ vector<vector<int> >  ErrorCalculator::checkErrors(int pers1,int pers2,int snp1,
                 {
                         errors[3].push_back(i-snp1);
                 }
-	 }
+   }
                 errors[0].push_back(snp2-snp1+1);
                 errors[1].push_back(snp2-snp1+1);
                 errors[2].push_back(snp2-snp1+1);
@@ -719,7 +951,7 @@ float ErrorCalculator::getOppHomThreshold( int pers1, int pers2, int snp1Old, in
      {
         ++OHCount;
      }
-  }	
+  } 
   return OHCount;
 }
 int ErrorCalculator::getMax(int &a,int &b, int &c, int &d)const
@@ -748,13 +980,17 @@ void ErrorCalculator::finalOutPut(int pers1,int pers2,int snp1,int snp2, float m
                return;
 
         }
-	
+  
              if(snp1>=marker_id.size()||snp2>=marker_id.size())
              {
                      cerr<<"something went wrong with the bmid file while outputing. The snp1 is: "<<snp1<<" snp2 is "<<snp2<<" marker id size is "<<marker_id.size()<<endl;
                      return;
 
              }
+
+
+
+
              //Addressing the use of IID instead of FID by stepping up one index in the master sample_id vector. This has been tested, and will be
              //applied to all outputs. It goes from sample_id[pers1*2] --> sample_id[(pers1*2)+1]
                 cout<<sample_id[(pers1*2)+1]<<"\t"
@@ -763,7 +999,11 @@ void ErrorCalculator::finalOutPut(int pers1,int pers2,int snp1,int snp2, float m
              <<marker_id[snp2].bp_distance<<"\t"
                <<(snp2-snp1)<<"\t"
                <<(marker_id[snp2].cm_distance-marker_id[snp1].cm_distance)<<endl;
-        
+                /*<piyush1>remove this */
+                //cout<<"icnr="<< icnr<<"  incrB="<<incrB<< "  per="<<icnr/incrB<<endl;
+
+
+
 
 }
 
@@ -822,17 +1062,17 @@ void ErrorCalculator::fullPlusDroppedOutput( int pers1,int pers2,int snp1,int sn
 //new error1 output
 template <class T>
 void ErrorCalculator::middleOutPut(int pers1, int pers2, int snp1, int snp2, int min_snp, float min_cm, vector<T> positions, float pct_err, int start, int end){
-	if( (snp1==-1) || (snp2==-1) ) return;
-	if( (sample_id.size() <= (pers1*2)) || (sample_id.size() <= (pers2*2)) ){
-		cerr << "Something went wrong with the bsid file while outputting data." << endl;
-		return;
-	}
-	cout << sample_id[(pers1*2)+1] << "\t" << sample_id[(pers2*2)+1] << "\t" << marker_id[snp1].bp_distance << "\t" << marker_id[snp2].bp_distance << "\t"
-	     << start << "/" << end << "\t" << (snp2-snp1) << "\t" << (marker_id[snp2].cm_distance - marker_id[snp1].cm_distance) << "\t" << "/";
-	for(int i = 0; i < positions.size(); i++){
-		cout << positions[i] << "/";
-	}
-	cout << "\t" << pct_err << endl;
+  if( (snp1==-1) || (snp2==-1) ) return;
+  if( (sample_id.size() <= (pers1*2)) || (sample_id.size() <= (pers2*2)) ){
+    cerr << "Something went wrong with the bsid file while outputting data." << endl;
+    return;
+  }
+  cout << sample_id[(pers1*2)+1] << "\t" << sample_id[(pers2*2)+1] << "\t" << marker_id[snp1].bp_distance << "\t" << marker_id[snp2].bp_distance << "\t"
+       << start << "/" << end << "\t" << (snp2-snp1) << "\t" << (marker_id[snp2].cm_distance - marker_id[snp1].cm_distance) << "\t" << "/";
+  for(int i = 0; i < positions.size(); i++){
+    cout << positions[i] << "/";
+  }
+  cout << "\t" << pct_err << endl;
 }
 //error1 output
 template <class T>
@@ -850,15 +1090,15 @@ void ErrorCalculator::middleOutPut( int pers1,int pers2,int snp1,int snp2, int m
                return;
         }
 
-	 cout<<sample_id[(pers1*2)+1]<<"\t"
+   cout<<sample_id[(pers1*2)+1]<<"\t"
              <<sample_id[(pers2*2)+1]<<"\t"
-		<<marker_id[snp1].bp_distance<<"\t"
+    <<marker_id[snp1].bp_distance<<"\t"
              <<marker_id[snp2].bp_distance<<"\t"
                <<(snp2-snp1)<<"\t"
                <<(marker_id[snp2].cm_distance-marker_id[snp1].cm_distance)<<"\t"<<"/";
         for(int i=0;i<positions.size();++i)
         {
-        	cout<<positions[i]<<"/";     
+          cout<<positions[i]<<"/";     
         }
         cout<<"\t"<< pct_err <<endl;
 
@@ -909,7 +1149,7 @@ void ErrorCalculator::middleOutPut( int pers1,int pers2,
         }
         if((marker_id[snp2].cm_distance - marker_id[snp1].cm_distance)<min_cm || (snp2-snp1) < min_snp )
         {
-	     cout << "Testing a theory. " << endl;
+       cout << "Testing a theory. " << endl;
              return;
         }
 
@@ -961,7 +1201,7 @@ void ErrorCalculator::middleOutPut( int pers1,int pers2,
              <<marker_id[snp2].bp_distance<<"\t"
                <<(snp2-snp1)<<"\t"
                <<(marker_id[snp2].cm_distance-marker_id[snp1].cm_distance)<<"\t"
-	       << pct_err << "\t" << start <<"/" << end << "/";
+         << pct_err << "\t" << start <<"/" << end << "/";
         for(int i=0;i<trims.size();++i)
         {
                 cout<<trims[i]<<"/";
@@ -993,16 +1233,16 @@ void ErrorCalculator::middleOutPut( int pers1,int pers2,
 //3 => dropped due to PIE
 template < class T > void ErrorCalculator::errorOutput(int pers1, int pers2, int snp1, int snp2, int min_snp, float min_cm, std::vector< T > positions,std::vector< int > errors, float pct_err, int startTrim,int endTrim, int start, int end, int reason)
 {
-	if( (snp1 == -1) || (snp2 == -1) ) return;
-	if(sample_id.size()<=pers1*2||sample_id.size()<=pers2*2)
+  if( (snp1 == -1) || (snp2 == -1) ) return;
+  if(sample_id.size()<=pers1*2||sample_id.size()<=pers2*2)
         {
                cerr<<"something went wrong with bsid file while outputing"<<endl;
                return;
         }
-	cout << sample_id[(pers1*2)+1] << "\t" << sample_id[(pers2*2)+1] << "\t" << marker_id[snp1].bp_distance << "\t" << marker_id[snp2].bp_distance << "\t"
+  cout << sample_id[(pers1*2)+1] << "\t" << sample_id[(pers2*2)+1] << "\t" << marker_id[snp1].bp_distance << "\t" << marker_id[snp2].bp_distance << "\t"
              << (snp2-snp1) << "\t" << (marker_id[snp2].cm_distance-marker_id[snp1].cm_distance) << "\t" << pct_err << "\t" << start << "/" << end << "\t" << startTrim <<"/" << endTrim << "\t" << reason 
-	     << "\t" << "/";
-	for(int i=0;i<errors.size();++i)
+       << "\t" << "/";
+  for(int i=0;i<errors.size();++i)
         {
                 cout << errors[i] << "/";
         }
@@ -1011,7 +1251,7 @@ template < class T > void ErrorCalculator::errorOutput(int pers1, int pers2, int
         {
                 cout << positions[i] << "/";
         }
-	cout << endl;
+  cout << endl;
 }
 //-----------------------------------------
 //==================================================
@@ -1068,11 +1308,11 @@ void ErrorCalculator::middleHoldOutPut( int pers1,
 float ErrorCalculator::getThreshold(vector<int> finalErrors,int snp1,int snp2, int ma_err_ends)
 {
            int length = snp2-snp1;
-  	   float sum=0;
+       float sum=0;
            for(int i=0;i<finalErrors.size();i++)
            {
-		finalErrors[i] = finalErrors[i] - 1; //this is to adjust to array indexing
-		if( (finalErrors[i] > snp1) && (finalErrors[i] < (snp2))) 
+    finalErrors[i] = finalErrors[i] - 1; //this is to adjust to array indexing
+    if( (finalErrors[i] > snp1) && (finalErrors[i] < (snp2))) 
                 {
                      ++sum;
                 }
@@ -1086,14 +1326,14 @@ float ErrorCalculator::getThreshold(vector<int> finalErrors,int snp1,int snp2, i
  *Description: Same as the above version of getThreshold, except for the fact that trulyIBD segments are not yet trimmed when this function is called
  *******************************************************************************/
 float ErrorCalculator::getThreshold(vector<int> finalErrors, int snp1, int snp2){
-	float sum = 0.0;
-	int length = snp2 - snp1;
-	for(int i = 0; i < finalErrors.size(); i++){
-		if( (finalErrors[i] > 0) && (finalErrors[i] < length)){
-			++sum;
-		}
-	}
-	return sum / length;
+  float sum = 0.0;
+  int length = snp2 - snp1;
+  for(int i = 0; i < finalErrors.size(); i++){
+    if( (finalErrors[i] > 0) && (finalErrors[i] < length)){
+      ++sum;
+    }
+  }
+  return sum / length;
 }
 
 float ErrorCalculator::getCMDistance(int position)
@@ -1128,10 +1368,10 @@ max_averages and returns the value at that percentile. For example, suppose that
 {0,0.1,0.2,0.3,0.5,0.6,0.7,0.8,0.9,1.0}. If we let x = 0.7, then we are requesting the 70th percentile
 ********************************************************************************************************************/
 float ErrorCalculator::getXthPercentile(float x){
-	assert((x >= 0.0) && (x<= 1.0));//avoid buffer overruns
-	int index = (int) ((x * max_averages.size())+0.5); //round up for now
-	index = index - 1; //array indexing
-	//just to be safe, make sure that this index is still in range
-	assert((index >= 0) && (index < max_averages.size()));
-	return max_averages[index];				
+  assert((x >= 0.0) && (x<= 1.0));//avoid buffer overruns
+  int index = (int) ((x * max_averages.size())+0.5); //round up for now
+  index = index - 1; //array indexing
+  //just to be safe, make sure that this index is still in range
+  assert((index >= 0) && (index < max_averages.size()));
+  return max_averages[index];       
 }

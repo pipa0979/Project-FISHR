@@ -5,12 +5,15 @@
 #include <unistd.h>
 #define GetCurrentDir getcwd
 
+
+
+
 ErrorFinderManager::ErrorFinderManager():WINDOW(50),
                     MIN_SNP(30),GAP(1), MA_SNP_END(50), TRUESNP( 600 ),
                     MIN_CM(0.4), MA_ERR_THRESHOLD_START(0.08),
                     MA_ERR_THRESHOLD_END(0.08),PCT_ERR_THRESHOLD( 0.90 ),
                     HO_THRESHOLD( 0.98 ), TRUECM( 6 ),PIELENGTH( 3 ),
-                    ISMOL( false), COUNTGAPERR( false ),MA_THRESHOLD(0.8),EMPIRICAL_MA_RESULT(-1.0), EMPIRICAL_PIE_RESULT(-1.0) 
+                    ISMOL( false), COUNTGAPERR( false ),MA_THRESHOLD(0.8),EMPIRICAL_MA_RESULT(-1.0), EMPIRICAL_PIE_RESULT(-1.0),EXTENDSNP(50)
 {
 }
 
@@ -21,13 +24,20 @@ void ErrorFinderManager::performConsolidation(int argc,char *argv[])
        bool pieThresholdError = false;
        char currentPath[FILENAME_MAX];
        if(!GetCurrentDir(currentPath,sizeof(currentPath))){
-	        cerr << "Error reading current directory" << endl;
-		return;
+          cerr << "Error reading current directory" << endl;
+    return;
        }
        for(int i=1;i<argc;i++)
         {
 
-                if(strcmp(argv[i],"-bmatch")==0&&i<argc-1)
+         /*Code for expanding window*/
+              if (strcmp(argv[i],"-extendSNP")==0 && i<argc-1)
+              {
+                EXTENDSNP=atoi(argv[++i]);
+                //cout<<"entered snp = "<<EXTENDSNP<<endl;
+              }
+
+              else if(strcmp(argv[i],"-bmatch")==0&&i<argc-1)
                 {
                      BMATCHFILE=string(argv[++i]);
                 }
@@ -48,11 +58,11 @@ void ErrorFinderManager::performConsolidation(int argc,char *argv[])
                 {
                      PEDFILE=string(argv[++i]);
                 }
-		            else  if(strcmp(argv[i],"-holdout-ped")==0&&i<argc-1)
+                else  if(strcmp(argv[i],"-holdout-ped")==0&&i<argc-1)
                 {
                      HPEDFILE=string(argv[++i]);
                 }
-		            else  if(strcmp(argv[i],"-holdout-map")==0&&i<argc-1)
+                else  if(strcmp(argv[i],"-holdout-map")==0&&i<argc-1)
                 {
                      HMAPFILE=string(argv[++i]);
                 }
@@ -99,40 +109,38 @@ void ErrorFinderManager::performConsolidation(int argc,char *argv[])
                       cerr << "ERROR: You have supplied both -emp-pie-threshold and -pct-err-threshold parameters, but only one is allowed. Please try again." << endl;
                       exit(1);
                      }
-                     EMPIRICAL_PIE_RESULT=atof(argv[++i]); 
-                     pieThresholdError = true;               
+                     EMPIRICAL_PIE_RESULT=atof(argv[++i]);
+                     pieThresholdError = true;
                 }
-		            else  if(strcmp(argv[i],"-output.type")==0&&i<argc-1)
+                else  if(strcmp(argv[i],"-output.type")==0&&i<argc-1)
                 {
                      OPTION=string(argv[++i]);
+                     //cout<<OPTION<<endl;
                 }
                 else if(strcmp(argv[i], "-snpfile") ==0&&i<argc-1){
                      SNPWEIGHTFILE = string(argv[++i]);
                 }
-                else if(strcmp(argv[i], "-cminputfile") ==0&&i<argc-1){
-                     CMINPUTFILE = string(argv[++i]);
-                }
                 else  if(strcmp(argv[i],"-log.file")==0&&i<argc-1)
                 {
                      LOGFILE=string(argv[++i]);
-                } 
-		else if(strcmp(argv[i],"-ma-threshold")==0&&i<argc-1)//adding new -ma-threshold argument
-		{
-		     if(thresholdError == true){ //user has already supplied an empirical-ma-threshold, so exit the program with an error message
-			cerr << "ERROR: You have supplied both -empirical-ma-threshold and -ma-threshold parameters, but only one is allowed. Exiting program."<< endl;
+                }
+    else if(strcmp(argv[i],"-ma-threshold")==0&&i<argc-1)//adding new -ma-threshold argument
+    {
+         if(thresholdError == true){ //user has already supplied an empirical-ma-threshold, so exit the program with an error message
+      cerr << "ERROR: You have supplied both -empirical-ma-threshold and -ma-threshold parameters, but only one is allowed. Exiting program."<< endl;
                         exit(1);
-		     }
-		     MA_THRESHOLD=atof(argv[++i]);
-		     thresholdError = true;
-		}
-		else if(strcmp(argv[i],"-empirical-ma-threshold")==0 && i<argc-1){
-		     if(thresholdError == true){
-			cerr << "ERROR: You have supplied both -empirical-ma-threshold and -ma-threshold parameters, but only one is allowed. Exiting program."<< endl;
-			exit(1);
-		     }	
-		     EMPIRICAL_MA_RESULT = atof(argv[++i]); //use the user supplied empirical ma threshold, instead of calculating it via true ibd segments	
-		     thresholdError = true;
-		}
+         }
+         MA_THRESHOLD=atof(argv[++i]);
+         thresholdError = true;
+    }
+    else if(strcmp(argv[i],"-empirical-ma-threshold")==0 && i<argc-1){
+         if(thresholdError == true){
+      cerr << "ERROR: You have supplied both -empirical-ma-threshold and -ma-threshold parameters, but only one is allowed. Exiting program."<< endl;
+      exit(1);
+         }
+         EMPIRICAL_MA_RESULT = atof(argv[++i]); //use the user supplied empirical ma threshold, instead of calculating it via true ibd segments
+         thresholdError = true;
+    }
                 else  if(strcmp(argv[i],"-PIE.dist.length")==0&&i<argc-1)
                 {
                      string MOL=string(argv[++i]);
@@ -142,7 +150,7 @@ void ErrorFinderManager::performConsolidation(int argc,char *argv[])
                      }
                      else
                      {
-                        PIELENGTH = atof( MOL.c_str() );
+                        PIELENGTH = atof( MOL.c_str() );//redundant string oeration
                      }
                 }
                 else  if(strcmp(argv[i],"-count.gap.errors")==0&&i<argc-1)
@@ -166,7 +174,7 @@ void ErrorFinderManager::performConsolidation(int argc,char *argv[])
 
                 displayError( argv[0] );
                 return;
-             
+
         }
         if( OPTION.compare( "" ) == 0 )
         {
@@ -179,25 +187,25 @@ void ErrorFinderManager::performConsolidation(int argc,char *argv[])
             LOGFILE = "FISH";
         }
         eCalculator.createLogFile( LOGFILE  );
-        eCalculator.countGapErrors( COUNTGAPERR ); 
+        eCalculator.countGapErrors( COUNTGAPERR );
         time_t startTime;
-
+       // cout<<"helloe5"<<endl;
         time (&startTime);
         string str_head = "****************************************************\n";
         str_head += "****************************************************\n";
         str_head += "FISHR LOG FILE INFORMATION\n\n";
         string str1 = " The program started at: " + string( ctime ( &startTime ) );
         string str = str_head + "Program working directory was: " + string(currentPath) +
-		     " \nProgram version was: " + string(argv[0]) +
-		     " \nProgram options:\n-bmatch file: " + BMATCHFILE +
+         " \nProgram version was: " + string(argv[0]) +
+         " \nProgram options:\n-bmatch file: " + BMATCHFILE +
                      " \n-bmid file: " + BMIDFILE +
                      " \n-bsid file: " + BSIDFILE +
-                     " \n-ped file: " + PEDFILE; 
-		     if(HPEDFILE.compare( "" ) !=0 && HMAPFILE.compare( "" ) !=0){
-		     str +=
+                     " \n-ped file: " + PEDFILE;
+         if(HPEDFILE.compare( "" ) !=0 && HMAPFILE.compare( "" ) !=0){
+         str +=
                      " \n-holdout ped file: " + HPEDFILE +
                      " \n-holdoutmap file: " + HMAPFILE;
-		     }
+         }
                      str += " \n-output type: " + OPTION +
                      " \n- missing SNP representation in pedfile: " + HO_MISSING +
                      " \n-log file: " + LOGFILE;
@@ -210,7 +218,7 @@ void ErrorFinderManager::performConsolidation(int argc,char *argv[])
                       str += " \nuser supplied percentage error threshold: " + NumberToString( PCT_ERR_THRESHOLD ) +
                       "\nuser did not supply an empirical-pie-threshold: NA";
                     } else {
-                      str += "\nuser did not supply a percentage error threshold: NA"; 
+                      str += "\nuser did not supply a percentage error threshold: NA";
                       str += "\nuser supplied empirical-pie-threshold: " + NumberToString( EMPIRICAL_PIE_RESULT );
                     }
                     if(EMPIRICAL_MA_RESULT < 0.0){
@@ -222,7 +230,7 @@ void ErrorFinderManager::performConsolidation(int argc,char *argv[])
                     }
                     "\n****************************************************\n";
 
-                  eCalculator.log( str );  
+                  eCalculator.log( str );
         initiateErrorFinder(); //but bypass true calculations if empirical threshold is supplied
       if( HPEDFILE.compare( "" ) !=0 && HMAPFILE.compare( "" ) != 0 )
       {
@@ -232,16 +240,16 @@ void ErrorFinderManager::performConsolidation(int argc,char *argv[])
                              MA_ERR_THRESHOLD_START,
                              MA_ERR_THRESHOLD_END,MIN_SNP,
                              MIN_CM,PCT_ERR_THRESHOLD, OPTION, HO_THRESHOLD, true  );*/
-	   consolidator.performTrim(eCalculator, WINDOW, MA_SNP_END,MA_THRESHOLD,MIN_SNP,MIN_CM,PCT_ERR_THRESHOLD,OPTION,HO_THRESHOLD,true,EMPIRICAL_MA_RESULT,EMPIRICAL_PIE_RESULT);
+     consolidator.performTrim(eCalculator, WINDOW, MA_SNP_END,MA_THRESHOLD,MIN_SNP,MIN_CM,PCT_ERR_THRESHOLD,OPTION,HO_THRESHOLD,true,EMPIRICAL_MA_RESULT,EMPIRICAL_PIE_RESULT,EXTENDSNP);//<piyush> added the param EXTENDSNP for calculating moving window
            cerr<<" Main Trim operation has completed "<< endl;
            cerr<< " Hold out trim has completed" <<endl;
            if( (OPTION.compare( "finalOutput" ) == 0) || (OPTION.compare( "Full" ) == 0 ) )
-           {   
+           {
                 consolidator.finalOutPut( eCalculator, MIN_CM, MIN_SNP );
            }
 
       }
-       else 
+       else
        {
             if( OPTION.compare( "Error3") == 0 )
             {
@@ -250,18 +258,18 @@ void ErrorFinderManager::performConsolidation(int argc,char *argv[])
                    <<" hold out ped and map file, program with not output anything" << endl;
               exit( -1 );
             }
-	   
-           consolidator.performTrim(eCalculator, WINDOW, MA_SNP_END, MA_THRESHOLD, MIN_SNP, MIN_CM, PCT_ERR_THRESHOLD, OPTION, HO_THRESHOLD, false,EMPIRICAL_MA_RESULT,EMPIRICAL_PIE_RESULT);
-	   //Removing this option for now. Can add/remove later as need be
+
+           consolidator.performTrim(eCalculator, WINDOW, MA_SNP_END, MA_THRESHOLD, MIN_SNP, MIN_CM, PCT_ERR_THRESHOLD, OPTION, HO_THRESHOLD, false,EMPIRICAL_MA_RESULT,EMPIRICAL_PIE_RESULT,EXTENDSNP);//<piyush> added the param EXTENDSNP for calculating moving window
+     //Removing this option for now. Can add/remove later as need be
       /*     consolidator.performTrim(eCalculator,WINDOW,MA_SNP_END,
-                                    MA_ERR_THRESHOLD_START, 
+                                    MA_ERR_THRESHOLD_START,
                                     MA_ERR_THRESHOLD_END,MIN_SNP,MIN_CM,
                                     PCT_ERR_THRESHOLD, OPTION, HO_THRESHOLD, false );*/
           if( (OPTION.compare( "finalOutput" ) == 0) || (OPTION.compare( "Full" ) == 0 ) )
            {
-		//cerr <<"DEBUG: ENTERING CONSOLIDATOR FINAL OUTPUT" << endl;
+    //cerr <<"DEBUG: ENTERING CONSOLIDATOR FINAL OUTPUT" << endl;
                 consolidator.finalOutPut( eCalculator, MIN_CM, MIN_SNP );
-		//cerr <<"DEBUG: EXITING CONSOLIDATOR FINAL OUTPUT" << endl;
+    //cerr <<"DEBUG: EXITING CONSOLIDATOR FINAL OUTPUT" << endl;
            }
         }
         time_t endTime;
@@ -280,7 +288,7 @@ void ErrorFinderManager::performConsolidation(int argc,char *argv[])
          str2 = "\n\n" + str1 + "        " + str2;
          //eCalculator.log( str1 );
           eCalculator.log( str2 );
-          
+
 }
 void ErrorFinderManager::displayError(std::string argv)
 {
@@ -310,23 +318,20 @@ void ErrorFinderManager::displayError(std::string argv)
 }
 void ErrorFinderManager::initiateErrorFinder()
 {
-       eCalculator.readBmidFile(BMIDFILE);
+        eCalculator.readBmidFile(BMIDFILE);
         cerr<<"Reading bmid file completed"<<endl;
         eCalculator.readBsidFile(BSIDFILE);
         cerr<<"Reading bsid file completed"<<endl;
         eCalculator.readPedFile(PEDFILE, HO_MISSING);
         cerr<<"Reading ped file completed"<<endl;
         int pers_count=eCalculator.getNoOfPersons();
-        consolidator.readMatches(BMATCHFILE, pers_count, eCalculator, TRUESNP, TRUECM );
+        consolidator.readMatches(BMATCHFILE, pers_count, eCalculator, TRUESNP, TRUECM, EXTENDSNP,PEDFILE  );
         cerr<<"Reading bmatch file completed"<<endl;
         if( !(SNPWEIGHTFILE.empty())){ //verify that this check actually works
           consolidator.readUserSuppliedSnpWeights(SNPWEIGHTFILE);
         }
-        if(!(CMINPUTFILE.empty())){
-          consolidator.readUserSuppliedCmWeights(CMINPUTFILE);
-        }
 //testing to see what happens when consolidation is removed
-        consolidator.performConsolidation(eCalculator,GAP,MIN_SNP,MIN_CM);
+        consolidator.performConsolidation(eCalculator,GAP,MIN_SNP,MIN_CM,EXTENDSNP);
         cerr<<"Consolidation completed"<<endl;
         if( HPEDFILE.compare( "" ) !=0 && HMAPFILE.compare( "" ) != 0 )
        {
@@ -354,10 +359,10 @@ void ErrorFinderManager::initiateErrorFinder()
           }
           else
           {
-            consolidator.findTrueSimplePctErrors( eCalculator, PIELENGTH, false, WINDOW, MA_THRESHOLD, EMPIRICAL_MA_RESULT );
+            consolidator.findTrueSimplePctErrors( eCalculator, PIELENGTH, false, WINDOW, MA_THRESHOLD, EMPIRICAL_MA_RESULT );//<piyush>
           }
             cerr<< " true hold out percentage errors calculated "<<endl;
-	
+  
       }   
   
 }

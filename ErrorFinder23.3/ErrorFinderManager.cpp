@@ -24,20 +24,20 @@ void ErrorFinderManager::performConsolidation(int argc,char *argv[])
        bool pieThresholdError = false;
        char currentPath[FILENAME_MAX];
        if(!GetCurrentDir(currentPath,sizeof(currentPath))){
-          cerr << "Error reading current directory" << endl;
-    return;
+	        cerr << "Error reading current directory" << endl;
+		return;
        }
        for(int i=1;i<argc;i++)
         {
 
-         /*Code for expanding window*/
-              if (strcmp(argv[i],"-extendSNP")==0 && i<argc-1)
-              {
-                EXTENDSNP=atoi(argv[++i]);
-                //cout<<"entered snp = "<<EXTENDSNP<<endl;
-              }
+    	   /*Code for expanding window*/
+    	   	    if (strcmp(argv[i],"-extendSNP")==0 && i<argc-1)
+    	   	    {
+    	   	    	EXTENDSNP=atoi(argv[++i]);
+    	   	    	//cout<<"entered snp = "<<EXTENDSNP<<endl;
+    	   	    }
 
-              else if(strcmp(argv[i],"-bmatch")==0&&i<argc-1)
+    	   	    else if(strcmp(argv[i],"-bmatch")==0&&i<argc-1)
                 {
                      BMATCHFILE=string(argv[++i]);
                 }
@@ -58,11 +58,11 @@ void ErrorFinderManager::performConsolidation(int argc,char *argv[])
                 {
                      PEDFILE=string(argv[++i]);
                 }
-                else  if(strcmp(argv[i],"-holdout-ped")==0&&i<argc-1)
+		            else  if(strcmp(argv[i],"-holdout-ped")==0&&i<argc-1)
                 {
                      HPEDFILE=string(argv[++i]);
                 }
-                else  if(strcmp(argv[i],"-holdout-map")==0&&i<argc-1)
+		            else  if(strcmp(argv[i],"-holdout-map")==0&&i<argc-1)
                 {
                      HMAPFILE=string(argv[++i]);
                 }
@@ -112,7 +112,7 @@ void ErrorFinderManager::performConsolidation(int argc,char *argv[])
                      EMPIRICAL_PIE_RESULT=atof(argv[++i]);
                      pieThresholdError = true;
                 }
-                else  if(strcmp(argv[i],"-output.type")==0&&i<argc-1)
+		            else  if(strcmp(argv[i],"-output.type")==0&&i<argc-1)
                 {
                      OPTION=string(argv[++i]);
                      //cout<<OPTION<<endl;
@@ -124,23 +124,23 @@ void ErrorFinderManager::performConsolidation(int argc,char *argv[])
                 {
                      LOGFILE=string(argv[++i]);
                 }
-    else if(strcmp(argv[i],"-ma-threshold")==0&&i<argc-1)//adding new -ma-threshold argument
-    {
-         if(thresholdError == true){ //user has already supplied an empirical-ma-threshold, so exit the program with an error message
-      cerr << "ERROR: You have supplied both -empirical-ma-threshold and -ma-threshold parameters, but only one is allowed. Exiting program."<< endl;
+		else if(strcmp(argv[i],"-ma-threshold")==0&&i<argc-1)//adding new -ma-threshold argument
+		{
+		     if(thresholdError == true){ //user has already supplied an empirical-ma-threshold, so exit the program with an error message
+			cerr << "ERROR: You have supplied both -empirical-ma-threshold and -ma-threshold parameters, but only one is allowed. Exiting program."<< endl;
                         exit(1);
-         }
-         MA_THRESHOLD=atof(argv[++i]);
-         thresholdError = true;
-    }
-    else if(strcmp(argv[i],"-empirical-ma-threshold")==0 && i<argc-1){
-         if(thresholdError == true){
-      cerr << "ERROR: You have supplied both -empirical-ma-threshold and -ma-threshold parameters, but only one is allowed. Exiting program."<< endl;
-      exit(1);
-         }
-         EMPIRICAL_MA_RESULT = atof(argv[++i]); //use the user supplied empirical ma threshold, instead of calculating it via true ibd segments
-         thresholdError = true;
-    }
+		     }
+		     MA_THRESHOLD=atof(argv[++i]);
+		     thresholdError = true;
+		}
+		else if(strcmp(argv[i],"-empirical-ma-threshold")==0 && i<argc-1){
+		     if(thresholdError == true){
+			cerr << "ERROR: You have supplied both -empirical-ma-threshold and -ma-threshold parameters, but only one is allowed. Exiting program."<< endl;
+			exit(1);
+		     }
+		     EMPIRICAL_MA_RESULT = atof(argv[++i]); //use the user supplied empirical ma threshold, instead of calculating it via true ibd segments
+		     thresholdError = true;
+		}
                 else  if(strcmp(argv[i],"-PIE.dist.length")==0&&i<argc-1)
                 {
                      string MOL=string(argv[++i]);
@@ -196,16 +196,16 @@ void ErrorFinderManager::performConsolidation(int argc,char *argv[])
         str_head += "FISHR LOG FILE INFORMATION\n\n";
         string str1 = " The program started at: " + string( ctime ( &startTime ) );
         string str = str_head + "Program working directory was: " + string(currentPath) +
-         " \nProgram version was: " + string(argv[0]) +
-         " \nProgram options:\n-bmatch file: " + BMATCHFILE +
+		     " \nProgram version was: " + string(argv[0]) +
+		     " \nProgram options:\n-bmatch file: " + BMATCHFILE +
                      " \n-bmid file: " + BMIDFILE +
                      " \n-bsid file: " + BSIDFILE +
                      " \n-ped file: " + PEDFILE;
-         if(HPEDFILE.compare( "" ) !=0 && HMAPFILE.compare( "" ) !=0){
-         str +=
+		     if(HPEDFILE.compare( "" ) !=0 && HMAPFILE.compare( "" ) !=0){
+		     str +=
                      " \n-holdout ped file: " + HPEDFILE +
                      " \n-holdoutmap file: " + HMAPFILE;
-         }
+		     }
                      str += " \n-output type: " + OPTION +
                      " \n- missing SNP representation in pedfile: " + HO_MISSING +
                      " \n-log file: " + LOGFILE;
@@ -240,7 +240,7 @@ void ErrorFinderManager::performConsolidation(int argc,char *argv[])
                              MA_ERR_THRESHOLD_START,
                              MA_ERR_THRESHOLD_END,MIN_SNP,
                              MIN_CM,PCT_ERR_THRESHOLD, OPTION, HO_THRESHOLD, true  );*/
-     consolidator.performTrim(eCalculator, WINDOW, MA_SNP_END,MA_THRESHOLD,MIN_SNP,MIN_CM,PCT_ERR_THRESHOLD,OPTION,HO_THRESHOLD,true,EMPIRICAL_MA_RESULT,EMPIRICAL_PIE_RESULT,EXTENDSNP);//<piyush> added the param EXTENDSNP for calculating moving window
+	   consolidator.performTrim(eCalculator, WINDOW, MA_SNP_END,MA_THRESHOLD,MIN_SNP,MIN_CM,PCT_ERR_THRESHOLD,OPTION,HO_THRESHOLD,true,EMPIRICAL_MA_RESULT,EMPIRICAL_PIE_RESULT,EXTENDSNP);//<piyush> added the param EXTENDSNP for calculating moving window
            cerr<<" Main Trim operation has completed "<< endl;
            cerr<< " Hold out trim has completed" <<endl;
            if( (OPTION.compare( "finalOutput" ) == 0) || (OPTION.compare( "Full" ) == 0 ) )
@@ -260,16 +260,16 @@ void ErrorFinderManager::performConsolidation(int argc,char *argv[])
             }
 
            consolidator.performTrim(eCalculator, WINDOW, MA_SNP_END, MA_THRESHOLD, MIN_SNP, MIN_CM, PCT_ERR_THRESHOLD, OPTION, HO_THRESHOLD, false,EMPIRICAL_MA_RESULT,EMPIRICAL_PIE_RESULT,EXTENDSNP);//<piyush> added the param EXTENDSNP for calculating moving window
-     //Removing this option for now. Can add/remove later as need be
+	   //Removing this option for now. Can add/remove later as need be
       /*     consolidator.performTrim(eCalculator,WINDOW,MA_SNP_END,
                                     MA_ERR_THRESHOLD_START,
                                     MA_ERR_THRESHOLD_END,MIN_SNP,MIN_CM,
                                     PCT_ERR_THRESHOLD, OPTION, HO_THRESHOLD, false );*/
           if( (OPTION.compare( "finalOutput" ) == 0) || (OPTION.compare( "Full" ) == 0 ) )
            {
-    //cerr <<"DEBUG: ENTERING CONSOLIDATOR FINAL OUTPUT" << endl;
+		//cerr <<"DEBUG: ENTERING CONSOLIDATOR FINAL OUTPUT" << endl;
                 consolidator.finalOutPut( eCalculator, MIN_CM, MIN_SNP );
-    //cerr <<"DEBUG: EXITING CONSOLIDATOR FINAL OUTPUT" << endl;
+		//cerr <<"DEBUG: EXITING CONSOLIDATOR FINAL OUTPUT" << endl;
            }
         }
         time_t endTime;
@@ -362,7 +362,7 @@ void ErrorFinderManager::initiateErrorFinder()
             consolidator.findTrueSimplePctErrors( eCalculator, PIELENGTH, false, WINDOW, MA_THRESHOLD, EMPIRICAL_MA_RESULT );//<piyush>
           }
             cerr<< " true hold out percentage errors calculated "<<endl;
-  
+	
       }   
   
 }

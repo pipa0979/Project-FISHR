@@ -27,12 +27,12 @@ public:
 class Consolidator
 {
         public:
-    //overloaded version to support new -ma-threshold argument and to depricate -ma-err-threshold-start and end
+	//overloaded version to support new -ma-threshold argument and to depricate -ma-err-threshold-start and end
     //update as of 7/30/14 to incorporate new emp-pie-thresh
-    void performTrim(ErrorCalculator& e_obj,int window,int ma_snp_ends,float ma_threshold,int min_snp,float min_cm,float per_err_threshold,string option,float hThreshold,bool holdout,float empirical_threshold, float empirical_pie_threshold,int extendSNP);//<piyush> added the param int EXTENDSNP for calculating moving window avg
+	void performTrim(ErrorCalculator& e_obj,int window,int ma_snp_ends,float ma_threshold,int min_snp,float min_cm,float per_err_threshold,string option,float hThreshold,bool holdout,float empirical_threshold, float empirical_pie_threshold,int extendSNP);//<piyush> added the param int EXTENDSNP for calculating moving window avg
  
        
-    void performConsolidation(ErrorCalculator& ecal, 
+	void performConsolidation(ErrorCalculator& ecal, 
               int gap, int min_snp, float min_cm,int extendSnp);
 
         void performHoldOutTrim( ErrorCalculator& ecal, 
@@ -61,14 +61,14 @@ class Consolidator
         /**/
         float get_snps_over_range(int snp1, int snp2, float weight);
 
-    //new methods to handle calculations of moving averages -nate 2/11/2014
-    std::vector < std::vector < std::vector < SNP > > > getTrueMatches(){
-        return m_trueMatches;
-    }
+	//new methods to handle calculations of moving averages -nate 2/11/2014
+	std::vector < std::vector < std::vector < SNP > > > getTrueMatches(){
+		return m_trueMatches;
+	}
 
-    void setTrueMatches(std::vector < std::vector < std::vector < SNP > > > x){
-        m_trueMatches = x;
-    }
+	void setTrueMatches(std::vector < std::vector < std::vector < SNP > > > x){
+		m_trueMatches = x;
+	}
         private:
        int person_count;
 
@@ -85,15 +85,15 @@ class Consolidator
         void sortMatches();
 
         static bool compareFunction(SNP s1, SNP s2);   
-    std::string consolidated_str;
-    std::string initial_drop_str;
-    std::string emp_pie_thresh_str;
-    std::string ma_drop_str;
-    std::string pie_drop_str;
-    std::string emp_ma_thresh_str;
-    std::string ibg_str;
-    std::string final_sh_str;
-    std::string ma_thresh_str;
-    int global_initial;
+	std::string consolidated_str;
+	std::string initial_drop_str;
+	std::string emp_pie_thresh_str;
+	std::string ma_drop_str;
+	std::string pie_drop_str;
+	std::string emp_ma_thresh_str;
+	std::string ibg_str;
+	std::string final_sh_str;
+	std::string ma_thresh_str;
+	int global_initial;
 };
 #endif // ndef CONSOLIDATOR_H

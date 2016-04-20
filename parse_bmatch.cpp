@@ -5,7 +5,10 @@
 #include <vector>
 #include <map>
 #include <iomanip>
-bool REDUCE=false, CM_FLAG=false, SNP_FLAG=false,INDEX=false,HAPLOID=true; 
+#include <string.h>
+#include <cstdlib>
+
+bool REDUCE=false, CM_FLAG=false, SNP_FLAG=false,INDEX=false,HAPLOID=true;
 int MIN_SNP=0,pers_count=0;
 float MIN_CM=0.0;
 using namespace std;
@@ -52,13 +55,13 @@ int main (int argc, char* argv[])
 			HAPLOID=false;
 		else if(argc>=8&&strcmp(argv[7],"-make-index")==0)
 			INDEX=true;
-			
+
 		if(argc>=9&&strcmp(argv[8],"-make-index")==0)
-			INDEX=true;	
+			INDEX=true;
 	} else {
 		 cerr << "Usage: " << argv[0] << " [BMATCH FILE] [BSID FILE] [BMID FILE] or [BMATCH FILE] [BSID FILE] [BMID FILE] -reduced -min_snp -min_cm -make-index(optional)" << endl;
 	}
-	
+
 
 	string line, discard;
 	ifstream file_bmatch( argv[1] , ios::binary );
@@ -67,7 +70,7 @@ int main (int argc, char* argv[])
 	if(!file_bmatch || !file_bsid || !file_bmid ) { cerr << "file could not be opened" << endl; return 0; }
 
 	stringstream ss;
-	string item;	
+	string item;
 	// load samples
 	vector< string > sample_id;
 	while( getline(file_bsid , line) )
@@ -75,15 +78,15 @@ int main (int argc, char* argv[])
 		//cout<<"the line: "<<line<<endl;
 		ss.clear();ss.str(line);
 		while(getline(ss,item,' '))
-		{      
+		{
 		//	cout<<"the item is: "<<item<<endl;
 			sample_id.push_back( item );
 			pers_count++;
 		}
 	}
-	
+
 	file_bsid.close();
-	// cout<<"number of persons are "<<pers_count<<endl;	
+	// cout<<"number of persons are "<<pers_count<<endl;
 	// load markers
 	vector< Marker > marker_id;
 	Marker cur_marker;
@@ -95,18 +98,18 @@ int main (int argc, char* argv[])
 		marker_id.push_back( cur_marker );
 	}
 	file_bmid.close();
-	
+
 	// load matches
 	unsigned int pid[2];
 	unsigned int sid[2],min1;
 	int dif;
 	float min2;
 	bool hom[2] , genetic;
-	
+
 	while ( !file_bmatch.eof() )
 	{
 		pid[0] = -1;
-		
+
 		file_bmatch.read( (char*) &pid[0] , sizeof( unsigned int ) );
 		if ( pid[0] == -1 ) continue;
 		file_bmatch.read( (char*) &pid[1] , sizeof( unsigned int ) );
@@ -116,7 +119,7 @@ int main (int argc, char* argv[])
 		file_bmatch.read( (char*) &hom[0] , sizeof( bool ) );
 		file_bmatch.read( (char*) &hom[1] , sizeof( bool ) );
 		min1=sid[1]-sid[0]+1;
-		min2=get_distance( marker_id[sid[0]] , marker_id[sid[1]] , genetic ); 
+		min2=get_distance( marker_id[sid[0]] , marker_id[sid[1]] , genetic );
 		if(SNP_FLAG&&CM_FLAG)if(min1<MIN_SNP||min2<MIN_CM) continue;
 		if(!HAPLOID&&(pid[0]*2>=sample_id.size()||pid[1]*2>=sample_id.size()))
 		{
@@ -128,14 +131,14 @@ int main (int argc, char* argv[])
 			cerr<<"the marker file bmid is not matching to bmatch file, please check it"<<endl;
 			return -1;
 		}
-			
+
 		string sub;
 		if(!HAPLOID)
 			sub=sample_id[ pid[0]*2];
 		else
 			sub=sample_id[pid[0]];
 		cout<< sub << '\t';
-		if(!HAPLOID)	
+		if(!HAPLOID)
 			sub=sample_id[pid[1]*2];
 		else sub=sample_id[pid[1]];
 			cout << sub << '\t';
@@ -143,8 +146,8 @@ int main (int argc, char* argv[])
 			cout << marker_id[ sid[0] ].chr << '\t';
 
 		cout << marker_id[ sid[0] ].bp_distance << "\t" << marker_id[ sid[1] ].bp_distance << "\t";
-			
-		if(!REDUCE){	
+
+		if(!REDUCE){
 			cout << marker_id[ sid[0] ].rsid << '\t' << marker_id[ sid[1] ].rsid << '\t';
 		}
 		cout <<min1 << '\t' << setiosflags(ios::fixed) << setprecision(2) <<min2 << '\t';

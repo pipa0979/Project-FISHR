@@ -112,7 +112,7 @@ void ErrorFinderManager::performConsolidation(int argc,char *argv[])
                      EMPIRICAL_PIE_RESULT=atof(argv[++i]);
                      pieThresholdError = true;
                 }
-		            else  if(strcmp(argv[i],"-output.type")==0&&i<argc-1)
+		            else  if(strcmp(argv[i],"-output-type")==0&&i<argc-1)
                 {
                      OPTION=string(argv[++i]);
                      //cout<<OPTION<<endl;
@@ -120,7 +120,7 @@ void ErrorFinderManager::performConsolidation(int argc,char *argv[])
                 else if(strcmp(argv[i], "-snpfile") ==0&&i<argc-1){
                      SNPWEIGHTFILE = string(argv[++i]);
                 }
-                else  if(strcmp(argv[i],"-log.file")==0&&i<argc-1)
+                else  if(strcmp(argv[i],"-log-file")==0&&i<argc-1)
                 {
                      LOGFILE=string(argv[++i]);
                 }
@@ -178,7 +178,7 @@ void ErrorFinderManager::performConsolidation(int argc,char *argv[])
         }
         if( OPTION.compare( "" ) == 0 )
         {
-            cerr<< " please provide a valid output.type option " <<endl;
+            cerr<< " please provide a valid output-type option " <<endl;
             exit( -1 );
         }
         if( LOGFILE.compare( "" ) == 0 )
@@ -299,14 +299,14 @@ void ErrorFinderManager::displayError(std::string argv)
                <<" -pct-err-threshold [max percentage of errors in a match after the trim] OR -emp-pie-threshold" 
                <<" -ma-threshold [specifies percentile to be drawn from trulyIBD data for MA calculations] OR -empirical-ma-threshold"
                <<" Note that if both -emp-pie-threshold and empirical-ma-threshold are supplied, then -trueSNP and -trueCM will be ignored"
-              <<"-output.type [ must provide any of these. it can be "
+              <<"-output-type [ must provide any of these. it can be "
                << "MovingAverages  or Error1 or Error2 or Error3 or ErrorRandom1 " 
                 << "or ErrorRandom2 or Error3 or ErrorRandom3 or Full "
                 <<  "look at the description about how these works in wiki ]"
               << "(optional) -holdout-ped [new ped file path] -holdout-map [new map file] "
               << "-holdout-threshold [threshold to drop a match with new ped file ]"
               << " -holdout-missing [missing value representation in new ped file] "
-              << " -log.file [log file name]"
+              << " -log-file [log file name]"
               << " -trueCM [ true match maximum cm length] " 
               << " - trueSNP [ true match SNP length]"
               << " -PIE.dist.length [ can be MOL or any cm distance length "
